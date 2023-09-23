@@ -27,35 +27,3 @@ padding-right.percent: 10
 
 ;; --------------------------------------------------------------
 ;; --------------------------------------------------------------
-
-;; ********** PAGE **********
-
--- component page:
-children wrapper:
-optional caption title:
-optional body body:
-boolean sidebar: false
-optional string document-title:
-optional string document-description:
-optional ftd.raw-image-src document-image:
-optional string site-name: fastn template
-optional ftd.image-src site-logo: $site-logo
-boolean github-icon: false
-optional string github-url:
-boolean full-width: false
-ftd.type-data typography: $typo.types
-ftd.color-scheme color-scheme: $blue-heal-cs.main
-integer logo-width: $common.logo-width
-integer logo-height: $common.logo-height
-boolean show-footer: true
-boolean show-banner: true
-ftd.ui list right-sidebar:
-ftd.ui list banner:
-fastn.app-ui apps: $common.apps
-boolean login-button: $common.login-button
-string site-url: $common.site-url
-
--- end: page
-
-;; --------------------------------------------------------------
-;; --------------------------------------------------------------
