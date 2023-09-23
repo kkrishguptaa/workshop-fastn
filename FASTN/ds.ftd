@@ -1,0 +1,29 @@
+-- import: fastn
+-- import: fastn-community.github.io/inter-typography as typo
+-- import: fastn-community.github.io/blue-heal-cs as blue-heal-cs
+
+-- import: fastn-community.github.io/doc-site/common
+-- import: fastn-community.github.io/doc-site/
+export: markdown,h0,h1,h2,h3,code,rendered,output,image,iframe,youtube,compact-text,post,posts,featured-post,image-first,image-in-between,without-image,author-bio,tip,not-found-1,not-found-2,link,link-group,layout,blue-heal-cs
+
+-- common.site-logo site-logo: $assets.files.assets.ipsum-logo.svg
+
+;; ********** LAYOUT **********
+
+-- component layout:
+children props:
+
+-- ftd.column:
+children: $layout.props
+width: fill-container
+max-width.fixed.px: 1280
+align-self: center
+padding-left.percent: 10
+padding-right.percent: 10
+
+-- end: ftd.column
+
+-- end: layout
+
+;; --------------------------------------------------------------
+;; --------------------------------------------------------------

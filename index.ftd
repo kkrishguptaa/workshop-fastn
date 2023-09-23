@@ -1,0 +1,174 @@
+-- import: package/base-layout as layout
+-- import: package/lib as lib
+-- import: components/button as button
+
+;; -------------------------------------------------------------------------
+;; ***** PORTFOLIO Layout starts *****
+;; -------------------------------------------------------------------------
+
+-- layout.base-layout:
+
+;; ------------------------------------------
+;; ***** PORTFOLIO Hero UI starts *****
+;; ------------------------------------------
+-- ftd.row:
+width: fill-container
+align-content: center
+
+-- ftd.container:
+width: fill-container
+padding-bottom.px: 20
+
+;; ------------------------------------------
+;; ***** PORTFOLIO Hero UI Mobile view starts *****
+;; ------------------------------------------
+
+-- ftd.mobile:
+-- ftd.column:
+width: fill-container
+align-content: center
+margin-top.px: 30
+spacing.fixed.px: 20
+
+-- ftd.column:
+width: fill-container
+align-content: center
+spacing.fixed.px: 20
+
+-- lib.hero-ui-base-text-wrapper:
+firstTitle: I'm
+secondTitle: Krish Gupta,
+
+-- lib.hero-ui-base-text-wrapper:
+firstTitle: Full Stack
+secondTitle: Developer
+
+-- lib.hero-ui-base-text-wrapper:
+firstTitle: and
+secondTitle: DEVREL.
+
+-- ftd.text: Developing experiences that your users will never forget. Web Performance and Accessibility Expert with a passion for building beautiful and functional user interfaces.
+role: $lib.home-description-responsive-typography
+margin-top.px: 10
+max-width.fixed.px: 700
+min-width.fixed.px: 450
+white-space: normal
+
+-- ftd.column:
+width: fill-container
+align-content: center
+spacing.fixed.px: 10
+
+-- button.button:
+title: Email
+link: mailto:xkrishguptaa@gmail.com
+isNewTab: true
+
+-- button.button:
+title: Twitter
+link: https://twitter.com/xkrishguptaa
+isNewTab: true
+
+-- button.button:
+title: LinkedIn
+link: https://linkedin.com/in/xkrishguptaa
+isNewTab: true
+
+-- button.button:
+title: GitHub
+link: https://github.com/xkrishguptaa
+isNewTab: true
+
+-- end: ftd.column
+
+
+-- end: ftd.column
+
+-- end: ftd.column
+
+-- end: ftd.mobile
+
+;; ------------------------------------------
+;; ***** PORTFOLIO Hero UI Mobile view ends *****
+;; ------------------------------------------
+
+;; ----------------------------------------------------------------
+;; ----------------------------------------------------------------
+
+
+;; ------------------------------------------
+;; ***** PORTFOLIO Hero UI Desktop view starts *****
+;; ------------------------------------------
+
+-- ftd.desktop:
+-- ftd.row:
+margin-top.px: 60
+spacing.fixed.px: 100
+-- ftd.column:
+width: fill-container
+align-content: center
+spacing.fixed.px: 20
+
+-- lib.hero-ui-base-text-wrapper:
+firstTitle: I'm
+secondTitle: Krish Gupta,
+
+-- lib.hero-ui-base-text-wrapper:
+firstTitle: Full Stack
+secondTitle: Developer
+
+-- lib.hero-ui-base-text-wrapper:
+firstTitle: and
+secondTitle: DevREL.
+
+-- ftd.text: Developing experiences that your users will never forget. Web Performance and Accessibility Expert with a passion for building beautiful and functional user interfaces.
+role: $lib.home-description-responsive-typography
+margin-top.px: 10
+max-width.fixed.px: 700
+min-width.fixed.px: 450
+white-space: normal
+
+-- ftd.column:
+width: fill-container
+align-content: center
+spacing.fixed.px: 10
+
+-- button.button:
+title: Twitter
+link: https://twitter.com/xkrishguptaa
+isNewTab: true
+
+-- button.button:
+title: LinkedIn
+link: https://linkedin.com/in/xkrishguptaa
+isNewTab: true
+
+-- button.button:
+title: GitHub
+link: https://github.com/xkrishguptaa
+isNewTab: true
+
+-- end: ftd.column
+
+-- end: ftd.column
+
+-- end: ftd.row
+
+-- end: ftd.desktop
+
+;; ------------------------------------------
+;; ***** PORTFOLIO Hero UI Desktop view ends *****
+;; ------------------------------------------
+
+-- end: ftd.container
+-- end: ftd.row
+
+;; ------------------------------------------
+;; ***** PORTFOLIO Hero UI ends *****
+;; ------------------------------------------
+
+-- end: layout.base-layout
+
+;; -------------------------------------------------------------------------
+;; ***** PORTFOLIO Layout ends *****
+;; -------------------------------------------------------------------------
