@@ -11,7 +11,7 @@ jobs:
     permissions: write-all
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: FranzDiebold/github-env-vars-action@v2
       - run: sh -c "$(curl -fsSL https://fastn.io/install.sh)"
       - name: Build the pages with fastn
