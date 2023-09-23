@@ -1,0 +1,61 @@
+-- import: fastn
+-- import: fastn-community.github.io/inter-typography as typo
+-- import: fastn-community.github.io/blue-heal-cs as blue-heal-cs
+
+-- import: fastn-community.github.io/doc-site/common
+-- import: fastn-community.github.io/doc-site/
+export: markdown,h0,h1,h2,h3,code,rendered,output,image,iframe,youtube,compact-text,post,posts,featured-post,image-first,image-in-between,without-image,author-bio,tip,not-found-1,not-found-2,link,link-group,layout,blue-heal-cs
+
+-- common.site-logo site-logo: $assets.files.assets.ipsum-logo.svg
+
+;; ********** LAYOUT **********
+
+-- component layout:
+children props:
+
+-- ftd.column:
+children: $layout.props
+width: fill-container
+max-width.fixed.px: 1280
+align-self: center
+padding-left.percent: 10
+padding-right.percent: 10
+
+-- end: ftd.column
+
+-- end: layout
+
+;; --------------------------------------------------------------
+;; --------------------------------------------------------------
+
+;; ********** PAGE **********
+
+-- component page:
+children wrapper:
+optional caption title:
+optional body body:
+boolean sidebar: false
+optional string document-title:
+optional string document-description:
+optional ftd.raw-image-src document-image:
+optional string site-name: fastn template
+optional ftd.image-src site-logo: $site-logo
+boolean github-icon: false
+optional string github-url:
+boolean full-width: false
+ftd.type-data typography: $typo.types
+ftd.color-scheme color-scheme: $blue-heal-cs.main
+integer logo-width: $common.logo-width
+integer logo-height: $common.logo-height
+boolean show-footer: true
+boolean show-banner: true
+ftd.ui list right-sidebar:
+ftd.ui list banner:
+fastn.app-ui apps: $common.apps
+boolean login-button: $common.login-button
+string site-url: $common.site-url
+
+-- end: page
+
+;; --------------------------------------------------------------
+;; --------------------------------------------------------------

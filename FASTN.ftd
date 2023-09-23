@@ -1,0 +1,20 @@
+-- import: fastn
+
+-- fastn.package: xkrishguptaa.github.io/fastn-portfolio
+favicon: /-/xkrishguptaa.github.io/fastn-portfolio/images/favicon.ico
+
+-- fastn.dependency: fastn-community.github.io/inter-typography
+-- fastn.dependency: fastn-community.github.io/blue-heal-cs as blue-heal-cs
+
+-- fastn.dependency: ayushsoni1010.github.io/ui-packages as package
+-- fastn.dependency: xkrishguptaa.github.io/fastn-portfolio/components as components
+
+-- fastn.auto-import: xkrishguptaa.github.io/fastn-portfolio/FASTN/ds
+-- fastn.auto-import: xkrishguptaa.github.io/fastn-portfolio/assets
+-- fastn.auto-import: components
+-- fastn.auto-import: doc-site
+-- fastn.auto-import: package
+
+-- fastn.sitemap:
+
+# Home: index.html

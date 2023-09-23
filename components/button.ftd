@@ -1,0 +1,28 @@
+;; --------------------------------------------------------------
+;; --------------------------------------------------------------
+
+;; ********** Button Component **********
+
+-- component button:
+string title:
+boolean isNewTab: false
+optional string link: #
+
+-- ftd.text: $button.title
+role: $inherited.types.label-large
+open-in-new-tab: $button.isNewTab
+link: $button.link
+color: #FEFFFF
+background.solid: #657BEC
+border-color: #A53006
+border-width.px: 2
+border-radius.px: 6
+padding-top.px: 8
+padding-bottom.px: 8
+padding-left.px: 14
+padding-right.px: 14
+
+-- end: button
+
+;; --------------------------------------------------------------
+;; --------------------------------------------------------------
