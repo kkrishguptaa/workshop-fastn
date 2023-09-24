@@ -128,3 +128,13 @@ View live demo - [xkrishguptaa.github.io/workshop-fastn-sep-2023](https://xkrish
   ![](https://github.com/xkrishguptaa/workshop-fastn-sep-2023/assets/135469703/ac88830a-1986-4dd9-ad20-0953b1e4ac56)
 
 - Save and you are done! Your website will soon be live at `YOUR_USERNAME.github.io/workshop-fastn-sep-2023`
+
+## 🔥 Beyond the workshop
+
+- Star the [fastn repository](https://dub.sh/krish-fastn-github)
+- Join the [fastn discord](https://dub.sh/krish-fastn-discord)
+- Read the [`fastn` for geeks article](https://dub.sh/krish-fastn-geeks)
+
+## 🎉 Hope you enjoyed!
+
+That's it for this workshop! Feel free to contact [me](https://biodrop.io/xkrishguptaa) for any doubts or to show of what you made! 😃
