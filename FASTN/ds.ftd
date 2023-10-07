@@ -1,29 +1,71 @@
 -- import: fastn
--- import: fastn-community.github.io/inter-typography as typo
--- import: fastn-community.github.io/blue-heal-cs as blue-heal-cs
 
--- import: fastn-community.github.io/doc-site/common
--- import: fastn-community.github.io/doc-site/
-export: markdown,h0,h1,h2,h3,code,rendered,output,image,iframe,youtube,compact-text,post,posts,featured-post,image-first,image-in-between,without-image,author-bio,tip,not-found-1,not-found-2,link,link-group,layout,blue-heal-cs
+-- import: doc-site/common
+-- import: doc-site
+export: h0,h1,h2,h3
 
--- common.site-logo site-logo: $assets.files.assets.ipsum-logo.svg
+-- import: types
+-- import: cs
 
-;; ********** LAYOUT **********
+-- import: workshop-fastn/FASTN/data
+
+;; ********** Layout **********
 
 -- component layout:
-children props:
+optional caption title:
+optional body body:
+optional string document-title: $data.site-name
+optional string document-description: $data.site-name
+children wrapper:
+ftd.type-data typography: $types.types
+ftd.color-scheme color-scheme: $cs.main
 
--- ftd.column:
-children: $layout.props
-width: fill-container
-max-width.fixed.px: 1280
-align-self: center
-padding-left.percent: 10
-padding-right.percent: 10
+-- doc-site.page:
+title: $layout.title
+body: $layout.body
+document-title: $layout.document-title
+document-description: $layout.document-description
+document-image:
+site-name: $data.site-name
+site-logo: $data.site-logo
+github-icon: false
+full-width: false
+types: $layout.typography
+colors: $layout.color-scheme
+logo-width: 50
+logo-height: 50
+show-footer: false
+sidebar: false
+show-banner: false
+wrapper: $layout.wrapper
 
--- end: ftd.column
+-- end: doc-site.page
 
 -- end: layout
 
 ;; --------------------------------------------------------------
+
+;; ********** Button Component **********
+
+-- component button:
+caption title:
+optional boolean isNewTab: true
+optional string link: #
+
+-- ftd.text: $button.title
+role: $inherited.types.label-large
+open-in-new-tab: $button.isNewTab
+link: $button.link
+color: $inherited.color-scheme.cta-primary.text
+background.solid: $inherited.color-scheme.cta-primary.base
+border-color: $inherited.color-scheme.cta-primary.border
+border-width.px: 2
+border-radius.px: 2
+padding-vertical.px: 6
+padding-horizontal.px: 12
+width: fill-container
+text-align: center
+
+-- end: button
+
 ;; --------------------------------------------------------------
