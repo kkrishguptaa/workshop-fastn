@@ -1,0 +1,28 @@
+-- import: workshop-fastn/FASTN/types
+
+-- string creator-name: Krish
+-- string creator-avatar: https://github.com/xkrishguptaa.png
+
+-- string headline: 🚀 Dev & 🌐 OSS Contributor
+-- string headline-body: 👇🏻 Check out the following links to know more about me!
+
+-- types.social list socials:
+
+-- types.social: Twitter
+profile-link: https://twitter.com/xkrishguptaa
+
+-- types.social: LinkedIn
+profile-link: https://www.linkedin.com/in/xkrishguptaa
+
+-- types.social: Instagram
+profile-link: https://www.instagram.com/xkrishguptaa
+
+-- end: socials
+
+-- string content-title: About Me
+
+-- body content-body: Hi 👋🏻 I'm Krish, a full stack developer from Delhi India. I actively contribute to open source and am interested in several things such as Web development, Design and Developer Relations
+
+;; ------------------------------
+-- string site-name: $creator-name
+-- string site-logo: $creator-avatar
