@@ -447,6 +447,21 @@ Prism.languages.ftd = {
         getAllFields() {
             return this.#fields;
         }
+        getClonedFields() {
+            let clonedFields = {};
+            for (let key in this.#fields) {
+                let field_value = this.#fields[key];
+                if (field_value instanceof fastn.recordInstanceClass
+                    || field_value instanceof fastn.mutableClass
+                    || field_value instanceof fastn.mutableListClass) {
+                    clonedFields[key] = this.#fields[key].getClone();
+                }
+                else {
+                    clonedFields[key] = this.#fields[key];
+                }
+            }
+            return clonedFields;
+        }
         addClosure(closure) {
             this.#closures.push(closure);
         }
@@ -517,6 +532,8 @@ Prism.languages.ftd = {
             this.#name = name;
             this.#global = global;
         }
+
+        getName() { return this.#name; }
     
         get(function_name) {
             return this.#global[`${this.#name}__${function_name}`];
@@ -536,7 +553,8 @@ Prism.languages.ftd = {
     fastn.recordInstanceClass = RecordInstance;
     fastn.module = function (name, global) {
         return new Module(name, global);
-    }    
+    }
+    fastn.moduleClass = Module;
 
     return fastn;
 })({});
@@ -843,6 +861,7 @@ fastn_dom.PropertyKind = {
     Selectable: 118,
     BackdropFilter: 119,
     Mask: 120,
+    TextInputValue: 121,
 };
 
 
@@ -1382,6 +1401,10 @@ class Node2 {
         }
     }
     updateTextInputValue() {
+        if(fastn_utils.isNull(this.#rawInnerValue)) {
+            this.attachAttribute("value");
+            return;
+        }
         if (!ssr && this.#node.tagName.toLowerCase() === 'textarea') {
             this.#node.innerHTML = this.#rawInnerValue;
         } else {
@@ -2349,7 +2372,7 @@ class Node2 {
                     this.attachCss("justify-content", staticValue[1]);
                     break;
                 case fastn_dom.Spacing.Fixed()[0]:
-                    this.attachCss("gap", staticValue[1]);
+                    this.attachCss("gap", fastn_utils.getStaticValue(staticValue[1]));
                     break;
             }
 
@@ -2471,7 +2494,13 @@ class Node2 {
             }
         } else if (kind === fastn_dom.PropertyKind.TextInputType) {
             this.attachAttribute("type", staticValue);
-        } else if (kind === fastn_dom.PropertyKind.DefaultTextInputValue) {
+        } else if (kind === fastn_dom.PropertyKind.TextInputValue) {
+            this.#rawInnerValue = staticValue;
+            this.updateTextInputValue();
+        } else if(kind === fastn_dom.PropertyKind.DefaultTextInputValue) {
+            if(!fastn_utils.isNull(this.#rawInnerValue)) {
+                return;
+            }
             this.#rawInnerValue = staticValue;
             this.updateTextInputValue();
         } else if (kind === fastn_dom.PropertyKind.InputMaxLength) {
@@ -3036,17 +3065,17 @@ let fastn_utils = {
     },
     getInheritedValues(default_args, inherited, function_args) {
         let record_fields = {
-            "colors": ftd.default_colors.getClone().setAndReturn("is-root", true),
-            "types": ftd.default_types.getClone().setAndReturn("is-root", true)
+            "colors": ftd.default_colors.getClone().setAndReturn("is_root", true),
+            "types": ftd.default_types.getClone().setAndReturn("is_root", true)
         }
         Object.assign(record_fields, default_args);
         let fields = {};
         if (inherited instanceof fastn.recordInstanceClass) {
-            fields = inherited.getAllFields();
-            if (fields["colors"].get("is-root")) {
+            fields = inherited.getClonedFields();
+            if (fastn_utils.getStaticValue(fields["colors"].get("is_root"))) {
                delete fields.colors;
             }
-            if (fields["types"].get("is-root")) {
+            if (fastn_utils.getStaticValue(fields["types"].get("is_root"))) {
                delete fields.types;
             }
         }
@@ -3234,6 +3263,7 @@ let fastn_utils = {
      */
     markdown_inline(i) {
         if (fastn_utils.isNull(i)) return;
+        i = i.toString();
         const { space_before, space_after } = fastn_utils.private.spaces(i);
         const o = (() => {
             let g = fastn_utils.private.replace_last_occurrence(marked.parse(i), "<p>", "");
@@ -3932,10 +3962,14 @@ fastn.webComponentVariable =  {
 }
 const ftd = (function() {
     const exports = {};
-    
+
     const riveNodes = {};
 
     const global = {};
+
+    const onLoadListeners = new Set();
+
+    let fastnLoaded = false;
 
     exports.global = global;
 
@@ -4090,52 +4124,102 @@ const ftd = (function() {
     exports.clear = exports.clear_all;
     exports.set_list = function (list, value) { list.set(value) }
 
-    exports.http = function (url, method, body, headers) {
+    /// Sample usage: ftd.http("/api/v1/...", "POST", ("a", 1), ("b", 2))
+    exports.http = function (url, method, fastn_module, ...body) {
         if (url instanceof fastn.mutableClass) url = url.get();
         if (method instanceof fastn.mutableClass) method = method.get();
+        if (fastn_module instanceof fastn.moduleClass) fastn_module = fastn_module.getName();
         method = method.trim().toUpperCase();
+        let request_json = {};
         const init = {
             method,
-            headers: {}
+            headers: {'Content-Type': 'application/json'},
+            json: null,
         };
-        if(headers && headers instanceof fastn.recordInstanceClass) {
-            Object.assign(init.headers, headers.toObject());
-        }
-        if(method !== 'GET') {
-            init.headers['Content-Type'] = 'application/json';
-        }
-        if(body && body instanceof fastn.recordInstanceClass && method !== 'GET') {
-            init.body = JSON.stringify(body.toObject());
-        }
-        fetch(url, init)
-        .then(res => {
-            if(!res.ok) {
-                return new Error("[http]: Request failed", res)
+        if (body && method !== 'GET') {
+            if (body[0] instanceof fastn.recordInstanceClass) {
+                if (body.length !== 1) {
+                    console.warn("body is a record instance, but has more than 1 element, ignoring");
+                }
+                request_json = body[0].toObject();
+            } else {
+                let json = body[0];
+                if (body.length !== 1 || (body[0].length === 2 && Array.isArray(body[0]))) {
+                    let new_json = {};
+                    // @ts-ignore
+                    for (let [header, value] of Object.entries(body)) {
+                        let [key, val] = value.length === 2 ? value : [header, value];
+                        new_json[key] = fastn_utils.getStaticValue(val);
+                    }
+                    json = new_json;
+                }
+                request_json = json;
             }
+        }
 
-            return res.json();
-        })
-        .then(json => {
-            console.log("[http]: Response OK", json);
-        })
-        .catch(console.error);
+        init.body = JSON.stringify(request_json);
+
+        let json;
+        fetch(url, init)
+            .then(res => {
+                if (!res.ok) {
+                    return new Error("[http]: Request failed", res)
+                }
+
+                return res.json();
+            })
+            .then(response => {
+                console.log("[http]: Response OK", response);
+                if (response.redirect) {
+                    window.location.href = response.redirect;
+                }
+                else if (!!response && !!response.reload) {
+                    window.location.reload();
+                } else {
+                    let data = {};
+                    if (!!response.errors) {
+                        for (let key of Object.keys(response.errors)) {
+                            let value = response.errors[key];
+                            if (Array.isArray(value)) {
+                                // django returns a list of strings
+                                value = value.join(" ");
+                            }
+                            // also django does not append `-error`
+                            key = key + "-error";
+                            key = fastn_module + "#" + key;
+                            data[key] = value;
+                        }
+                    }
+                    if (!!response.data) {
+                        if (Object.keys(data).length !== 0) {
+                            console.log("both .errors and .data are present in response, ignoring .data");
+                        }
+                        else {
+                            data = response.data;
+                        }
+                    }
+                    for (let ftd_variable of Object.keys(data)) {
+                        // @ts-ignore
+                        window.ftd.set_value(ftd_variable, data[ftd_variable]);
+                    }
+                }
+            })
+            .catch(console.error);
+        return json;
     }
 
     exports.navigate = function(url, request_data) {
         let query_parameters = new URLSearchParams();
-        if(request_data instanceof RecordInstance) {
+        if(request_data instanceof fastn.recordInstanceClass) {
             // @ts-ignore
             for (let [header, value] of Object.entries(request_data.toObject())) {
-                if (header != "url" && header != "function" && header != "method") {
-                    let [key, val] = value.length == 2 ? value : [header, value];
-                    query_parameters.set(key, val);
-                }
+                let [key, val] = value.length === 2 ? value : [header, value];
+                query_parameters.set(key, val);
             }
         }
         let query_string = query_parameters.toString();
         if (query_string) {
-            let get_url = url + "?" + query_parameters.toString();
-            window.location.href = get_url;
+            window.location.href = url + "?" + query_parameters.toString();
         }
         else {
             window.location.href = url;
@@ -4188,6 +4272,26 @@ const ftd = (function() {
             localStorage.removeItem(key);
         }
     }
+
+    exports.on_load = listener => {
+        if(typeof listener !== 'function') {
+            throw new Error("listener must be a function");
+        }
+
+        if(fastnLoaded) {
+            listener();
+            return;
+        }
+        
+        onLoadListeners.add(listener);
+    };
+
+    exports.emit_on_load = () => {
+        if(fastnLoaded) return;
+        
+        fastnLoaded = true;
+        onLoadListeners.forEach(listener => listener());
+    };
 
     // LEGACY
 
@@ -4546,6 +4650,40 @@ ftd.increment_by = function (args) {
     let __args__ = fastn_utils.getArgs({
     }, args);
     let fastn_utils_val___args___a = fastn_utils.clone(fastn_utils.getter(__args__.a) + fastn_utils.getter(__args__.v));
+    if (fastn_utils_val___args___a instanceof fastn.mutableClass) {
+      fastn_utils_val___args___a = fastn_utils_val___args___a.get();
+    }
+    if (!fastn_utils.setter(__args__.a, fastn_utils_val___args___a)) {
+      __args__.a = fastn_utils_val___args___a;
+    }
+  } finally {
+    __fastn_package_name__ = __fastn_super_package_name__;
+  }
+}
+ftd.decrement = function (args) {
+  let __fastn_super_package_name__ = __fastn_package_name__;
+  __fastn_package_name__ = "workshop_fastn";
+  try {
+    let __args__ = fastn_utils.getArgs({
+    }, args);
+    let fastn_utils_val___args___a = fastn_utils.clone(fastn_utils.getter(__args__.a) - 1);
+    if (fastn_utils_val___args___a instanceof fastn.mutableClass) {
+      fastn_utils_val___args___a = fastn_utils_val___args___a.get();
+    }
+    if (!fastn_utils.setter(__args__.a, fastn_utils_val___args___a)) {
+      __args__.a = fastn_utils_val___args___a;
+    }
+  } finally {
+    __fastn_package_name__ = __fastn_super_package_name__;
+  }
+}
+ftd.decrement_by = function (args) {
+  let __fastn_super_package_name__ = __fastn_package_name__;
+  __fastn_package_name__ = "workshop_fastn";
+  try {
+    let __args__ = fastn_utils.getArgs({
+    }, args);
+    let fastn_utils_val___args___a = fastn_utils.clone(fastn_utils.getter(__args__.a) - fastn_utils.getter(__args__.v));
     if (fastn_utils_val___args___a instanceof fastn.mutableClass) {
       fastn_utils_val___args___a = fastn_utils_val___args___a.get();
     }
