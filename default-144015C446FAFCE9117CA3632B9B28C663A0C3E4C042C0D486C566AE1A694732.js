@@ -1209,6 +1209,26 @@ fastn_dom.Length = {
         }
         return `${value}vw`;
     },
+    Dvh: (value) => {
+        if (value instanceof fastn.mutableClass) {
+            return fastn.formula([value], function () { return `${value.get()}dvh`})
+        }
+        return `${value}dvh`;
+    },
+    Lvh: (value) => {
+        if (value instanceof fastn.mutableClass) {
+            return fastn.formula([value], function () { return `${value.get()}lvh`})
+        }
+         return `${value}lvh`;
+    },
+    Svh: (value) => {
+        if (value instanceof fastn.mutableClass) {
+             return fastn.formula([value], function () { return `${value.get()}svh`})
+        }
+        return `${value}svh`;
+    },
+
+
     Vmin: (value) => {
         if (value instanceof fastn.mutableClass) {
             return fastn.formula([value], function () { return `${value.get()}vmin`})
@@ -1735,16 +1755,30 @@ class Node2 {
             return;
         }
 
-        let direction = fastn_utils.getStaticValue(value.get("direction"));
+        const closure = fastn.closure(() => {
+            let direction = fastn_utils.getStaticValue(value.get("direction"));
 
-        const [lightGradientString, darkGradientString] = this.getLinearGradientString(value);
+            const [lightGradientString, darkGradientString] = this.getLinearGradientString(value);
 
-        if (lightGradientString === darkGradientString) {
-            this.attachCss("background-image", `linear-gradient(${direction}, ${lightGradientString})`, false);
-        } else {
-            let lightClass = this.attachCss("background-image", `linear-gradient(${direction}, ${lightGradientString})`,true);
-            this.attachCss("background-image", `linear-gradient(${direction}, ${darkGradientString})`, true, `body.dark .${lightClass}`);
-        }
+            if (lightGradientString === darkGradientString) {
+                this.attachCss("background-image", `linear-gradient(${direction}, ${lightGradientString})`, false);
+            } else {
+                let lightClass = this.attachCss("background-image", `linear-gradient(${direction}, ${lightGradientString})`,true);
+                this.attachCss("background-image", `linear-gradient(${direction}, ${darkGradientString})`, true, `body.dark .${lightClass}`);
+            }
+        }).addNodeProperty(this, null, inherited);
+
+        const colorsList = value.get("colors").get().getList();
+
+        colorsList
+        .forEach(({ item }) => {
+            const color = item.get("color");
+
+            [color.get("light"), color.get("dark")].forEach(variant => {
+                variant.addClosure(closure);
+                this.#mutables.push(variant);
+            });
+        });
     }
     attachBackgroundImageCss(value) {
         if (fastn_utils.isNull(value)) {
@@ -1935,32 +1969,48 @@ class Node2 {
             this.attachCss(property, value);
             return;
         }
-        let lightValue = fastn_utils.getStaticValue(value.get("light"));
-        let darkValue = fastn_utils.getStaticValue(value.get("dark"));
-        if (lightValue === darkValue) {
-            this.attachCss(property, lightValue, false);
-        } else {
-            let lightClass = this.attachCss(property, lightValue, true);
-            this.attachCss(property, darkValue, true, `body.dark .${lightClass}`);
-            if (visited) {
-                this.attachCss(property, lightValue, true, `.${lightClass}:visited`);
-                this.attachCss(property, darkValue, true, `body.dark  .${lightClass}:visited`);
+        value = value instanceof fastn.mutableClass ? value.get() : value;
+        
+        const lightValue = value.get("light");
+        const darkValue = value.get("dark");
+
+        const closure = fastn.closure(() => {
+            let lightValueStatic = fastn_utils.getStaticValue(lightValue);
+            let darkValueStatic = fastn_utils.getStaticValue(darkValue);
+            
+            if (lightValueStatic === darkValueStatic) {
+                this.attachCss(property, lightValueStatic, false);
+            } else {
+                let lightClass = this.attachCss(property, lightValueStatic, true);
+                this.attachCss(property, darkValueStatic, true, `body.dark .${lightClass}`);
+                if (visited) {
+                    this.attachCss(property, lightValueStatic, true, `.${lightClass}:visited`);
+                    this.attachCss(property, darkValueStatic, true, `body.dark  .${lightClass}:visited`);
+                }
             }
-        }
+        }).addNodeProperty(this, null, inherited);
+
+        [lightValue, darkValue].forEach(modeValue => {
+            modeValue.addClosure(closure);
+            this.#mutables.push(modeValue);
+        });
     }
     attachRoleCss(value) {
         if (fastn_utils.isNull(value)) {
             this.attachCss('role', value);
             return;
         }
-        let desktopValue = fastn_utils.getStaticValue(value.get("desktop"));
-        let mobileValue = fastn_utils.getStaticValue(value.get("mobile"));
-        if (fastn_utils.sameResponsiveRole(desktopValue, mobileValue)) {
-            this.attachCss("role", fastn_utils.getRoleValues(desktopValue), true);
-        } else {
-            let desktopClass = this.attachCss("role", fastn_utils.getRoleValues(desktopValue), true);
-            this.attachCss("role", fastn_utils.getRoleValues(mobileValue), true, `body.mobile .${desktopClass}`);
-        }
+        value.addClosure(fastn.closure(() => {
+            let desktopValue = value.get("desktop");
+            let mobileValue = value.get("mobile");
+            if (fastn_utils.sameResponsiveRole(desktopValue, mobileValue)) {
+                this.attachCss("role", fastn_utils.getRoleValues(desktopValue), true);
+            } else {
+                let desktopClass = this.attachCss("role", fastn_utils.getRoleValues(desktopValue), true);
+                this.attachCss("role", fastn_utils.getRoleValues(mobileValue), true, `body.mobile .${desktopClass}`);
+            }
+        }).addNodeProperty(this, null, inherited));
+        this.#mutables.push(value);
     }
     attachTextStyles(styles) {
         if (fastn_utils.isNull(styles)) {
@@ -3461,7 +3511,6 @@ let fastn_utils = {
             return lowercased;
         }).join('');
     },
-
     escapeHtmlInCode(str) {
         return str.replace(/[<]/g, "&lt;");
     },
@@ -3676,7 +3725,39 @@ fastn_utils.private = {
         while (newChildrenWrapper.firstChild) {
             parent.appendChild(newChildrenWrapper.firstChild);
         }
-    }
+    },
+
+    // Cookie related functions ----------------------------------------------
+    setCookie(cookieName, cookieValue) {
+        cookieName = fastn_utils.getStaticValue(cookieName);
+        cookieValue = fastn_utils.getStaticValue(cookieValue);
+
+        // Default expiration period of 30 days
+        var expires = "";
+        var expirationDays = 30;
+        if (expirationDays) {
+            var date = new Date();
+            date.setTime(date.getTime() + (expirationDays * 24 * 60 * 60 * 1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+
+        document.cookie = cookieName + "=" + encodeURIComponent(cookieValue) + expires + "; path=/";
+    },
+    getCookie(cookieName) {
+        cookieName = fastn_utils.getStaticValue(cookieName);
+        var name = cookieName + "=";
+        var decodedCookie = decodeURIComponent(document.cookie);
+        var cookieArray = decodedCookie.split(';');
+
+        for (var i = 0; i < cookieArray.length; i++) {
+            var cookie = cookieArray[i].trim();
+            if (cookie.indexOf(name) === 0) {
+                return cookie.substring(name.length, cookie.length);
+            }
+        }
+
+        return "None";
+    },
 }
 
 
@@ -4372,6 +4453,17 @@ const ftd = (function() {
         } else {
             return value;
         }
+    }
+
+    // Language related functions ---------------------------------------------
+    exports.set_current_language = function (language) {
+        language = fastn_utils.getStaticValue(language);
+        fastn_utils.private.setCookie("fastn-lang", language);
+        location.reload();
+    }
+
+    exports.get_current_language = function () {
+        return fastn_utils.private.getCookie("fastn-lang");
     }
 
     return exports;
